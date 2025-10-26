@@ -1,0 +1,3 @@
+[submodule "colored_text"]
+	path = colored_text
+	url = git@github.com:mowinckel107/colored_text.git
