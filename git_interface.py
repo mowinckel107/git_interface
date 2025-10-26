@@ -12,11 +12,9 @@ class Git_Response:
     return_code: int
 
 
-QUIET : bool  = False; # This overrules VERBOSE
-VERBOSE : bool = True;
+VERBOSE : bool = False;
 
 REPO_PATH : str
-
 
 
 def set_repo_to_run_commands_on(repo_path : str):
@@ -48,20 +46,24 @@ def git_command(command : str, quiet : bool = False, allowed_to_fail : bool = Fa
 
     git_response : Git_Response = run_git_command(command, REPO_PATH)
 
-    if QUIET or quiet:
+    if quiet:
         return git_response
 
-    print(f"command: {green_text(command)}", end="")
+    print(f"command: {green_text(command)}")
 
     if VERBOSE:
         print(f"return code: {git_response.return_code}")
-        print("git response:")
-        if git_response.return_code == 0:
+
+    print("git response:")
+    if git_response.return_code == 0:
+        print_text_yellow(git_response.response_text)
+    else:
+        if allowed_to_fail:
             print_text_yellow(git_response.response_text)
         else:
             print_text_red(git_response.response_text)
-    else:
-        print("")
+
+    print("")
 
     print("")
     print("")
