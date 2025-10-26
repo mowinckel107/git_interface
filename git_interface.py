@@ -1,4 +1,3 @@
-
 from colored_text import *
 
 import sys
@@ -52,8 +51,7 @@ def git_command(command : str, quiet : bool = False, allowed_to_fail : bool = Fa
     if QUIET or quiet:
         return git_response
 
-    print(f"command: ", end="")
-    print_text_green(command)
+    print(f"command: {green_text(command)}", end="")
 
     if VERBOSE:
         print(f"return code: {git_response.return_code}")
@@ -72,8 +70,5 @@ def git_command(command : str, quiet : bool = False, allowed_to_fail : bool = Fa
         sys.exit(-1)
 
     return git_response
-
-
-
 
 
