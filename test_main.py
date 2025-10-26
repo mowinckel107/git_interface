@@ -1,6 +1,6 @@
 
 
-from git_interface_library import *
+from git_interface import *
 
 
 import sys
