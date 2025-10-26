@@ -1,5 +1,5 @@
 
-
+from colored_text.colored_text  import *
 from git_interface import *
 
 
@@ -14,15 +14,15 @@ from dataclasses import dataclass
 
 def main_function():
 
-    repo_path : str =  "/home/moose/Desktop/Code/Python/git_interface"
+  register__git_command_error_handler(print)
 
-    command : str = "git branch"
-    git_response : Git_Response = run_git_command(command, repo_path)
-    print(command)
-    print(git_response.return_code)
-    print(git_response.response_text)
 
-    print("All done. ")
+  repo_path : str =  "/home/moose/Desktop/Code/Python/git_interface"
+  set_repository_path_to_run_commands_on(repo_path)
+
+  git_command("git branch")
+
+  print("All done. ")
 
 
 

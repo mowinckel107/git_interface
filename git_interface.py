@@ -1,9 +1,15 @@
-from colored_text import *
 
 import sys
+
+from colored_text.colored_text import *
+
+
 import subprocess
 from typing import Optional
 from dataclasses import dataclass
+
+from collections.abc import Callable
+
 
 
 @dataclass
@@ -12,10 +18,10 @@ class Git_Response:
     return_code: int
 
 
-VERBOSE : bool = True;
+VERBOSE : bool = False;
 REPO_PATH : str
 
-
+ERROR_HANDLER  = print
 
 
 
@@ -24,7 +30,10 @@ def set_repository_path_to_run_commands_on(repo_path : str):
     REPO_PATH = repo_path
 
 
-
+def register__git_command_error_handler(Error_handler):
+    """The function given will be called with message from failed git commands"""
+    global ERROR_HANDLER
+    ERROR_HANDLER = Error_handler
 
 
 def run_git_command( command_line : str, directory_to_call_from : Optional[str] = None ) -> Git_Response:
@@ -70,11 +79,11 @@ def git_command(command : str, quiet : bool = False, allowed_to_fail : bool = Fa
             print_text_red(git_response.response_text)
 
     print("")
-
     print("")
     print("")
 
     if(not allowed_to_fail and git_response.return_code != 0):
+        ERROR_HANDLER(f"command: {command}\n {git_response.response_text}")
         sys.exit(-1)
 
     return git_response
