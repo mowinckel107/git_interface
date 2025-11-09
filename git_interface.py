@@ -1,4 +1,5 @@
 
+import os
 import sys
 
 from colored_text.colored_text import *
@@ -8,6 +9,7 @@ import subprocess
 from typing import Optional
 from dataclasses import dataclass
 
+from os import PathLike
 from collections.abc import Callable
 
 
@@ -25,33 +27,18 @@ ERROR_HANDLER  = print
 
 
 
-def set_repository_path_to_run_commands_on(repo_path : str):
+def set_repository_path_to_run_commands_on(repo_path : PathLike):
     global REPO_PATH
     REPO_PATH = repo_path
 
 
-def register__git_command_error_handler(Error_handler):
+
+
+
+def register_git_command_error_handler(Error_handler):
     """The function given will be called with message from failed git commands"""
     global ERROR_HANDLER
     ERROR_HANDLER = Error_handler
-
-
-def run_git_command( command_line : str, directory_to_call_from : Optional[str] = None ) -> Git_Response:
-    """Runs git command, returns output and status code."""
-
-    command : list[str] = command_line.split()
-
-    response_object : subprocess.CompletedProcess[bytes]= subprocess.run(
-        command,
-        check = False,
-        capture_output = True,
-        cwd = directory_to_call_from
-    )
-
-    return_string : str = response_object.stdout.decode("utf-8")
-    return_string += response_object.stderr.decode("utf-8")
-
-    return Git_Response(return_string, response_object.returncode)
 
 
 
@@ -59,7 +46,7 @@ def run_git_command( command_line : str, directory_to_call_from : Optional[str] 
 
 def git_command(command : str, quiet : bool = False, allowed_to_fail : bool = False) -> Git_Response:
 
-    git_response : Git_Response = run_git_command(command, REPO_PATH)
+    git_response : Git_Response = __run_git_command(command, REPO_PATH)
 
     if quiet:
         return git_response
@@ -99,7 +86,9 @@ def get_central_branch_name() -> str:
 
     for line in response.response_text.split("\n"):
 
-        cleaned_line : str = line.strip().lower()
+        cleaned_line : str = line.replace("*","").strip().lower()
+
+        print(cleaned_line)
 
         if cleaned_line == "master" or cleaned_line == "main":
             if main_or_master_branch != "":
@@ -146,18 +135,6 @@ def get_starting_branch_name() -> str:
 
 
 
-def check_that_starting_branch_is_not_central_branch(starting_branch_name : str, central_branch_name):
-    if starting_branch_name == central_branch_name:
-        print(f"You seem to have the {yellow_text(central_branch_name)} branch checked out")
-        print(f"Please switch to the branch you want to merge into {central_branch_name} branch with this command:")
-        print_text_yellow("git switch <your_branch_name>")
-        print("")
-        sys.exit(-1)
-
-
-
-
-
 def get_commit_message(commit_id : str) -> str:
     commit_message : str = ""
 
@@ -183,3 +160,24 @@ def get_commit_author(commit_id : str) -> str:
             commit_message = line.split(": ")[1]
 
     return commit_message
+
+
+
+
+
+def __run_git_command( command_line : str, directory_to_call_from : Optional[PathLike] = None ) -> Git_Response:
+    """Runs git command, returns output and status code."""
+
+    command : list[str] = command_line.split()
+
+    response_object : subprocess.CompletedProcess[bytes]= subprocess.run(
+        command,
+        check = False,
+        capture_output = True,
+        cwd = directory_to_call_from
+    )
+
+    return_string : str = response_object.stdout.decode("utf-8")
+    return_string += response_object.stderr.decode("utf-8")
+
+    return Git_Response(return_string, response_object.returncode)
