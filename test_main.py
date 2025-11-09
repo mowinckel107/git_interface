@@ -30,7 +30,8 @@ def main_function():
 
 
 
-  git_command("git branch")
+  # git_command("git branch")
+  git_command("git commit -m 'Added handeling quotation marks correctly'")
 
   print("All done. ")
 

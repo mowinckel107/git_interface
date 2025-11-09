@@ -80,32 +80,32 @@ def git_command(command : str, quiet : bool = False, allowed_to_fail : bool = Fa
 
 
 def get_central_branch_name() -> str:
-    main_or_master_branch : str = ""
+  main_or_master_branch : str = ""
 
-    response : Git_Response = git_command("git branch", quiet = True)
+  response : Git_Response = git_command("git branch", quiet = True)
 
-    for line in response.response_text.split("\n"):
+  for line in response.response_text.split("\n"):
 
-        cleaned_line : str = line.replace("*","").strip().lower()
+      cleaned_line : str = line.replace("*","").strip().lower()
 
-        print(cleaned_line)
+      print(cleaned_line)
 
-        if cleaned_line == "master" or cleaned_line == "main":
-            if main_or_master_branch != "":
-                print("Sorry, but")
-                print(f"There is both a branch called {main_or_master_branch} and one called {cleaned_line}")
-                print("This script in its current form only expects 1 of those")
-                sys.exit(-1)
-            main_or_master_branch = cleaned_line.strip()
+      if cleaned_line == "master" or cleaned_line == "main":
+          if main_or_master_branch != "":
+              print("Sorry, but")
+              print(f"There is both a branch called {main_or_master_branch} and one called {cleaned_line}")
+              print("This script in its current form only expects 1 of those")
+              sys.exit(-1)
+          main_or_master_branch = cleaned_line.strip()
 
 
-    if main_or_master_branch == "":
-        print(f"I am sorry. I cannot seem to find a branch called ", end = "")
-        print(f"{yellow_text("master")} or {yellow_text("main")}")
-        print("Currently this script expects one of those to exist")
-        sys.exit(-1)
+  if main_or_master_branch == "":
+      print(f"I am sorry. I cannot seem to find a branch called ", end = "")
+      print(f"{yellow_text("master")} or {yellow_text("main")}")
+      print("Currently this script expects one of those to exist")
+      sys.exit(-1)
 
-    return main_or_master_branch
+  return main_or_master_branch
 
 
 
@@ -166,18 +166,88 @@ def get_commit_author(commit_id : str) -> str:
 
 
 def __run_git_command( command_line : str, directory_to_call_from : Optional[PathLike] = None ) -> Git_Response:
-    """Runs git command, returns output and status code."""
+  """Runs git command, returns output and status code."""
 
-    command : list[str] = command_line.split()
+  print(command_line)
+  command : list[str] = list()
 
-    response_object : subprocess.CompletedProcess[bytes]= subprocess.run(
-        command,
-        check = False,
-        capture_output = True,
-        cwd = directory_to_call_from
-    )
+  single : str = "'"
+  double : str = '"'
 
-    return_string : str = response_object.stdout.decode("utf-8")
-    return_string += response_object.stderr.decode("utf-8")
+  single_amount : int = command_line.count(single)
+  double_amount : int = command_line.count(double)
 
-    return Git_Response(return_string, response_object.returncode)
+  if( single_amount + double_amount ) > 0:
+
+    if ( single_amount%2 != 0 ):
+      print_text_red("There seem to be an uneven amount of ' signs in the command:")
+      print_text_yellow(command_line)
+      sys.exit(-1)
+
+    if ( double_amount%2 != 0 ):
+      print_text_red('There seem to be an uneven amount of " signs in the command:')
+      print_text_yellow(command_line)
+      sys.exit(-1)
+    
+    inside_single_citation : boolean = False
+    inside_double_citation : boolean = False
+    index : int = 0
+    for leading_index, character in enumerate(command_line):
+      if character == single:
+        if(inside_double_citation):
+          print_text_red("The git interface cannot as of yet deal with strings embedded in strings in commands")
+          print_text_yellow(command_line)
+          raise Exception
+          sys.exit(-1)
+
+        chunk : str = command_line[index:leading_index]
+        print(chunk)
+
+        if inside_single_citation:
+          command.append(chunk)
+        else:
+          for part in chunk.split():
+            command.append(part)
+
+        inside_single_citation = not inside_single_citation # update
+        index = leading_index + 1
+
+
+      if character == double:
+        if(inside_single_citation):
+          print_text_red("The git interface cannot as of yet deal with strings embedded in strings in commands")
+          print_text_yellow(command_line)
+          raise Exception
+          sys.exit(-1)
+
+
+        chunk : str = command_line[index:leading_index]
+        print(chunk)
+
+        if inside_double_citation:
+          command.append(chunk)
+        else:
+          for part in chunk.split():
+            command.append(part)
+
+        inside_double_citation = not inside_double_citation # update
+        index = leading_index + 1
+
+  if len(command) == 0:
+    for word in command_line.split():
+      command.append(word)
+
+
+  response_object : subprocess.CompletedProcess[bytes]= subprocess.run(
+      command,
+      check = False,
+      capture_output = True,
+      cwd = directory_to_call_from
+  )
+
+  return_string : str = response_object.stdout.decode("utf-8")
+  return_string += response_object.stderr.decode("utf-8")
+
+  return Git_Response(return_string, response_object.returncode)
+
+
