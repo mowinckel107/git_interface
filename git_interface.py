@@ -2,7 +2,9 @@
 import os
 import sys
 
-from colored_text.colored_text import *
+
+
+from .colored_text.colored_text import *
 
 
 import subprocess
