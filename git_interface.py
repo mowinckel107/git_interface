@@ -1,4 +1,11 @@
 
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from _typeshed import StrPath
+
 import os
 import sys
 
@@ -11,8 +18,12 @@ import subprocess
 from typing import Optional
 from dataclasses import dataclass
 
-from os import PathLike
+
 from collections.abc import Callable
+
+
+
+
 
 
 
@@ -29,7 +40,7 @@ ERROR_HANDLER  = print
 
 
 
-def set_repository_path_to_run_commands_on(repo_path : PathLike):
+def set_repository_path_to_run_commands_on(repo_path : StrPath):
     global REPO_PATH
     REPO_PATH = repo_path
 
@@ -167,7 +178,7 @@ def get_commit_author(commit_id : str) -> str:
 
 
 
-def __run_git_command( command_line : str, directory_to_call_from : Optional[PathLike] = None ) -> Git_Response:
+def __run_git_command( command_line : str, directory_to_call_from : Optional[StrPath] = None ) -> Git_Response:
   """Runs git command, returns output and status code."""
 
   print(command_line)
@@ -191,8 +202,8 @@ def __run_git_command( command_line : str, directory_to_call_from : Optional[Pat
       print_text_yellow(command_line)
       sys.exit(-1)
     
-    inside_single_citation : boolean = False
-    inside_double_citation : boolean = False
+    inside_single_citation : bool = False
+    inside_double_citation : bool = False
     index : int = 0
     for leading_index, character in enumerate(command_line):
       if character == single:
