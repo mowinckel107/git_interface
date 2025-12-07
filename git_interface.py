@@ -11,7 +11,10 @@ import sys
 
 
 
-from .colored_text.colored_text import *
+if sys.argv[0] == "test.py":
+  from colored_text.colored_text import *
+else:
+  from .colored_text.colored_text import *
 
 
 import subprocess
