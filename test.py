@@ -28,7 +28,7 @@ def main_function():
 
   repo_path : str =  "/home/moose/Desktop/Code/Python/git_interface"
 
-  git_command("git branch")
+  git_command(["git", "branch"])
 
 
   print("")
